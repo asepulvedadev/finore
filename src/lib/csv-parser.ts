@@ -1,3 +1,5 @@
+import Papa from 'papaparse';
+
 export interface CSVRow {
   [key: string]: string;
 }
@@ -19,22 +21,16 @@ export async function fetchCSVData(url: string): Promise<CSVRow[]> {
 }
 
 function parseCSV(csvText: string): CSVRow[] {
-  const lines = csvText.trim().split('\n');
+  const result = Papa.parse(csvText, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: (header: string) => header.trim(),
+    transform: (value: string) => value?.trim() || '',
+  });
 
-  if (lines.length < 2) {
-    return [];
+  if (result.errors.length > 0) {
+    console.warn('CSV parsing errors:', result.errors);
   }
 
-  const headers = lines[0].split(',').map(header => header.trim().replace(/"/g, ''));
-
-  return lines.slice(1).map(line => {
-    const values = line.split(',').map(value => value.trim().replace(/"/g, ''));
-    const row: CSVRow = {};
-
-    headers.forEach((header, index) => {
-      row[header] = values[index] || '';
-    });
-
-    return row;
-  });
+  return result.data as CSVRow[];
 }
