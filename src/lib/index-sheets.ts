@@ -115,8 +115,8 @@ export async function checkAndIndexData() {
   console.log('Verificando y indexando datos si es necesario...');
 
   // Verificar si la API key de Gemini está configurada
-  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === 'your_gemini_api_key_here') {
-    console.log('GEMINI_API_KEY no configurada. Saltando indexación.');
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY === 'your_gemini_api_key_here') {
+    console.log('GOOGLE_GENERATIVE_AI_API_KEY no configurada. Saltando indexación.');
     return {
       success: true,
       count: 0,
