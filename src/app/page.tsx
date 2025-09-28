@@ -1,6 +1,20 @@
+"use client";
+
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
+
+  return (
   return (
     <div className="min-h-screen bg-finore-secondary">
       <header className="bg-finore-primary shadow-sm">
@@ -13,7 +27,15 @@ export default function Home() {
               height={50}
               priority
             />
-            <h1 className="text-2xl font-bold text-white">Dashboard Finore</h1>
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold text-white">Dashboard Finore</h1>
+              <button
+                onClick={() => setIsDark(!isDark)}
+                className="px-4 py-2 bg-white text-finore-primary rounded hover:bg-gray-100"
+              >
+                {isDark ? 'Modo Claro' : 'Modo Oscuro'}
+              </button>
+            </div>
           </div>
         </div>
       </header>
