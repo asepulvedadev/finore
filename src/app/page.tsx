@@ -1,9 +1,25 @@
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { AuthGuard } from "@/components/auth-guard";
+import { fetchCSVData, CSVRow } from "@/lib/csv-parser";
 
 export default function Home() {
+  const [csvData, setCsvData] = useState<CSVRow[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      // Replace with your actual CSV URL
+      const CSV_URL = process.env.NEXT_PUBLIC_CSV_URL || 'https://docs.google.com/spreadsheets/d/e/YOUR_SHEET_ID/pub?output=csv';
+      const data = await fetchCSVData(CSV_URL);
+      setCsvData(data);
+      setIsLoadingData(false);
+    };
+
+    loadData();
+  }, []);
   return (
     <AuthGuard>
       <div className="min-h-screen bg-background">
@@ -46,6 +62,47 @@ export default function Home() {
           <div className="mt-6 sm:mt-8 bg-card p-4 sm:p-6 rounded-lg shadow border">
             <h2 className="text-lg sm:text-xl font-semibold text-card-foreground mb-4">Información Financiera</h2>
             <p className="text-sm sm:text-base text-muted-foreground">Aquí se mostrará la información financiera detallada de la empresa Finore.</p>
+          </div>
+
+          <div className="mt-6 sm:mt-8 bg-card p-4 sm:p-6 rounded-lg shadow border">
+            <h2 className="text-lg sm:text-xl font-semibold text-card-foreground mb-4">Datos de Excel</h2>
+            {isLoadingData ? (
+              <p className="text-sm sm:text-base text-muted-foreground">Cargando datos...</p>
+            ) : csvData.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full table-auto">
+                  <thead>
+                    <tr className="border-b">
+                      {Object.keys(csvData[0]).map((header) => (
+                        <th key={header} className="text-left p-2 text-sm font-medium text-card-foreground">
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {csvData.slice(0, 10).map((row, index) => (
+                      <tr key={index} className="border-b">
+                        {Object.values(row).map((value, cellIndex) => (
+                          <td key={cellIndex} className="p-2 text-sm text-muted-foreground">
+                            {value}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {csvData.length > 10 && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Mostrando las primeras 10 filas de {csvData.length} registros.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm sm:text-base text-muted-foreground">
+                No se pudieron cargar los datos. Verifica la URL del CSV.
+              </p>
+            )}
           </div>
         </main>
       </div>
