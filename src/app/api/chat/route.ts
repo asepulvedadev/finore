@@ -29,7 +29,7 @@ Pregunta del usuario: ${userMessage}`;
 
     // Generar respuesta con Gemini
     const result = await generateText({
-      model: google('models/gemini-1.5-flash-latest'),
+      model: google('gemini-1.5-flash'),
       system: systemPrompt,
       prompt: userMessage,
       temperature: 0.7,
