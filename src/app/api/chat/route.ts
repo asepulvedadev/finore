@@ -72,18 +72,38 @@ INSTRUCCIONES:
 
 Pregunta: ${userMessage}`;
 
-    // Generar respuesta con Gemini usando Vercel AI SDK
-    const result = await generateText({
-      model: google('gemini-2.0-flash-lite'),
-      system: systemPrompt,
-      prompt: userMessage,
-      temperature: 0.7,
-    });
+    console.log('Iniciando generación de respuesta con IA...');
 
-    return Response.json({
-      content: result.text,
-      contextUsed: chunks?.length || 0
-    });
+    try {
+      // Generar respuesta con Gemini usando Vercel AI SDK (con timeout)
+      const result = await Promise.race([
+        generateText({
+          model: google('gemini-2.0-flash-lite'),
+          system: systemPrompt,
+          prompt: userMessage,
+          temperature: 0.7,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), 30000)
+        )
+      ]) as Awaited<ReturnType<typeof generateText>>;
+
+      console.log('Respuesta generada exitosamente:', result.text.substring(0, 100) + '...');
+
+      return Response.json({
+        content: result.text,
+        contextUsed: chunks?.length || 0
+      });
+    } catch (aiError) {
+      console.error('Error en la generación de IA:', aiError);
+
+      // Respuesta de fallback si falla la IA
+      return Response.json({
+        content: `Lo siento, tuve un problema técnico al procesar tu pregunta. Los datos muestran que hay ${chunks?.length || 0} registros disponibles. ¿Puedes reformular tu pregunta sobre los datos del Excel?`,
+        contextUsed: chunks?.length || 0,
+        error: true
+      });
+    }
 
   } catch (error) {
     console.error('Error in chat API:', error);
