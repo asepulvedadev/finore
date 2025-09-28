@@ -27,9 +27,26 @@ export async function POST(request: Request) {
       const { data: chunkData, error: searchError } = await supabaseAdmin
         .from('document_chunks')
         .select('content, metadata')
-        .limit(20);
+        .limit(50) // Aumentar límite para obtener más datos
+        .order('id', { ascending: false }); // Obtener los más recientes primero
 
       chunks = chunkData || [];
+
+      // Si no hay chunks, intentar obtener datos del CSV directamente
+      if (chunks.length === 0) {
+        console.log('No chunks found, fetching CSV data directly...');
+        try {
+          const csvResponse = await fetch(process.env.NEXT_PUBLIC_CSV_URL || '');
+          const csvText = await csvResponse.text();
+          // Crear un chunk con los primeros 1000 caracteres del CSV
+          chunks = [{
+            content: `Datos del Excel financiero (primeros 1000 caracteres): ${csvText.substring(0, 1000)}...`,
+            metadata: { source: 'csv_fallback', type: 'raw_data' }
+          }];
+        } catch (csvError) {
+          console.error('Error fetching CSV fallback:', csvError);
+        }
+      }
 
       if (searchError) {
         console.error('Error fetching chunks:', searchError);
@@ -59,18 +76,18 @@ DATOS DISPONIBLES: ${dataSummary}
 CONTEXTO DE DATOS:
 ${context}
 
-INSTRUCCIONES:
-- TODAS las preguntas sobre Excel, datos, números, sucursales, créditos, montos, fechas, etc. SON preguntas sobre datos financieros
-- Responde DIRECTAMENTE con números específicos y análisis
-- Para preguntas sobre totales: suma y calcula los totales de los datos
-- Para preguntas sobre cumplimiento: analiza si se cumplen metas basándote en los datos
-- Para preguntas sobre sucursales: compara rendimiento y da rankings específicos
-- Para preguntas sobre meses/fechas: filtra y analiza datos por periodos
-- Si es pregunta sobre datos financieros: SIEMPRE responde con información específica
+INSTRUCCIONES CRÍTICAS:
+- TODAS las preguntas sobre Excel, datos, números, sucursales, créditos, montos, fechas SON preguntas válidas sobre datos financieros
+- NUNCA digas "No tengo información" si hay datos disponibles - busca en todo el contexto proporcionado
+- Las sucursales incluyen TODOS los estados: Tamaulipas, Nuevo León, Chihuahua, Durango, Coahuila, etc.
+- Para preguntas sobre sucursales específicas: busca en TODOS los datos, no solo menciones algunas
+- Responde DIRECTAMENTE con números específicos y análisis basado en los datos reales
+- Si preguntan por una sucursal específica: proporciona estadísticas concretas de esa sucursal
+- Si no encuentras datos exactos: di "Según los datos disponibles..." y proporciona información similar
 - Solo rechaza preguntas completamente ajenas a finanzas/datos (como "qué tiempo hace")
 - Responde en español, sé específico con números y porcentajes
 
-Pregunta: ${userMessage}`;
+Pregunta del usuario: ${userMessage}`;
 
     console.log('Iniciando generación de respuesta con IA...');
 
