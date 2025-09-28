@@ -1,6 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { generateEmbedding } from '@/lib/ai';
 
 export async function POST(request: Request) {
   try {
@@ -16,13 +17,51 @@ export async function POST(request: Request) {
       return Response.json({ error: 'User message required' }, { status: 400 });
     }
 
-    // Por ahora, respuesta simple sin RAG para probar funcionalidad básica
-    const systemPrompt = `Eres Ferb, un asistente de IA especializado en análisis financiero. Tu nombre viene de Phineas y Ferb.
+    // Buscar contexto relevante en la base de datos vectorial
+    let context = '';
+    let relevantChunks: any[] = [];
 
-Instrucciones:
-- Responde de manera amigable y profesional
-- Mantén las respuestas concisas pero informativas
+    try {
+      const queryEmbedding = await generateEmbedding(userMessage);
+
+      const { data: chunks, error: searchError } = await supabaseAdmin.rpc(
+        'match_document_chunks',
+        {
+          query_embedding: queryEmbedding,
+          match_threshold: 0.1,
+          match_count: 10
+        }
+      );
+
+      if (searchError) {
+        console.error('Error searching chunks:', searchError);
+        context = 'Error al buscar información en la base de datos.';
+      } else if (chunks && chunks.length > 0) {
+        relevantChunks = chunks;
+        context = chunks.map((chunk: any) => chunk.content).join('\n\n');
+      } else {
+        context = 'No se encontró información relevante en la base de datos para esta consulta.';
+      }
+    } catch (embeddingError) {
+      console.error('Error generating embedding for search:', embeddingError);
+      context = 'Error al procesar la consulta de búsqueda.';
+    }
+
+    // Crear el prompt del sistema para análisis financiero
+    const systemPrompt = `Eres Ferb, un asistente de IA especializado ÚNICAMENTE en análisis de datos financieros del Excel de Finore. Tu nombre viene de Phineas y Ferb.
+
+INFORMACIÓN DISPONIBLE:
+${context}
+
+INSTRUCCIONES ESTRICTAS:
+- SOLO responde preguntas relacionadas con los datos del Excel financiero
+- SI la pregunta NO está relacionada con datos financieros o Excel, di: "Lo siento, solo puedo ayudarte con análisis de datos financieros del Excel."
+- Realiza cálculos, porcentajes y análisis estadístico cuando sea solicitado
+- Da ideas para mejorar métricas financieras basadas en los datos
+- Compara sucursales, tendencias y desempeño
 - Siempre responde en español
+- Sé específico con números y porcentajes cuando los tengas
+- Si no hay suficiente información, dilo claramente
 - Tu personalidad es inteligente, útil y un poco juguetona como Ferb
 
 Pregunta del usuario: ${userMessage}`;
@@ -37,7 +76,7 @@ Pregunta del usuario: ${userMessage}`;
 
     return Response.json({
       content: result.text,
-      contextUsed: 0
+      contextUsed: relevantChunks?.length || 0
     });
 
   } catch (error) {
