@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ModeToggle } from "@/components/mode-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 export default function Home() {
   return (
@@ -16,7 +17,10 @@ export default function Home() {
             />
             <div className="flex items-center gap-4">
               <h1 className="text-2xl font-bold text-foreground">Dashboard Finore</h1>
-              <ModeToggle />
+              <div className="flex items-center gap-2">
+                <ModeToggle />
+                <UserMenu />
+              </div>
             </div>
           </div>
         </div>
