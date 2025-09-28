@@ -6,11 +6,14 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { AuthGuard } from "@/components/auth-guard";
 import { ChatModal } from "@/components/chat-modal";
+import { Button } from "@/components/ui/button";
 import { fetchCSVData, CSVRow } from "@/lib/csv-parser";
 
 export default function Home() {
   const [csvData, setCsvData] = useState<CSVRow[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isIndexing, setIsIndexing] = useState(false);
+  const [indexMessage, setIndexMessage] = useState<string>('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -25,21 +28,8 @@ export default function Home() {
         } else {
           setCsvData(result.data);
 
-          // Después de cargar los datos, verificar y indexar si es necesario
-          try {
-            const indexResponse = await fetch('/api/index-sheets', {
-              method: 'POST',
-            });
-            const indexResult = await indexResponse.json();
-
-            if (indexResult.error) {
-              console.error('Error en indexación:', indexResult.error);
-            } else {
-              console.log('Indexación:', indexResult.message);
-            }
-          } catch (indexError) {
-            console.error('Error al verificar indexación:', indexError);
-          }
+          // Nota: La indexación ahora es manual para evitar demoras en la carga
+          // Se puede activar desde un botón o configuración
         }
       } catch (error) {
         console.error('Error fetching CSV data:', error);
@@ -50,6 +40,28 @@ export default function Home() {
 
     loadData();
   }, []);
+
+  const handleIndexData = async () => {
+    setIsIndexing(true);
+    setIndexMessage('');
+
+    try {
+      const response = await fetch('/api/index-sheets', {
+        method: 'POST',
+      });
+      const result = await response.json();
+
+      if (result.error) {
+        setIndexMessage(`Error: ${result.error}`);
+      } else {
+        setIndexMessage(result.message || 'Indexación completada');
+      }
+    } catch (error) {
+      setIndexMessage('Error al conectar con el servidor');
+    } finally {
+      setIsIndexing(false);
+    }
+  };
   return (
     <AuthGuard>
       <div className="min-h-screen bg-background">
@@ -76,7 +88,21 @@ export default function Home() {
         </header>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
           <div className="bg-card p-4 sm:p-6 rounded-lg shadow border">
-            <h2 className="text-lg sm:text-xl font-semibold text-card-foreground mb-4">Datos de Excel</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-card-foreground">Datos de Excel</h2>
+              <Button
+                onClick={handleIndexData}
+                disabled={isIndexing || isLoadingData}
+                size="sm"
+              >
+                {isIndexing ? 'Indexando...' : 'Indexar para IA'}
+              </Button>
+            </div>
+            {indexMessage && (
+              <div className="mb-4 p-2 bg-muted rounded text-sm">
+                {indexMessage}
+              </div>
+            )}
             {isLoadingData ? (
               <p className="text-sm sm:text-base text-muted-foreground">Cargando datos...</p>
             ) : csvData.length > 0 ? (
@@ -92,7 +118,7 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {csvData.map((row, index) => (
+                    {csvData.slice(0, 20).map((row, index) => (
                       <tr key={index} className="border-b">
                         {Object.values(row).map((value, cellIndex) => (
                           <td key={cellIndex} className="p-2 text-sm text-muted-foreground">
@@ -103,6 +129,11 @@ export default function Home() {
                     ))}
                   </tbody>
                 </table>
+                {csvData.length > 20 && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Mostrando las primeras 20 filas de {csvData.length} registros.
+                  </p>
+                )}
               </div>
             ) : (
               <p className="text-sm sm:text-base text-muted-foreground">

@@ -17,23 +17,30 @@ export async function POST(request: Request) {
     }
 
     // Buscar contexto relevante en la base de datos vectorial
-    const { data: relevantChunks, error: searchError } = await supabaseAdmin.rpc(
-      'match_document_chunks',
-      {
-        query_embedding: await generateEmbedding(userMessage),
-        match_threshold: 0.1,
-        match_count: 5
+    let context = 'No se encontró información relevante en la base de datos.';
+
+    try {
+      const queryEmbedding = await generateEmbedding(userMessage);
+
+      const { data: relevantChunks, error: searchError } = await supabaseAdmin.rpc(
+        'match_document_chunks',
+        {
+          query_embedding: queryEmbedding,
+          match_threshold: 0.1,
+          match_count: 5
+        }
+      );
+
+      if (searchError) {
+        console.error('Error searching chunks:', searchError);
+        context = 'Error al buscar información en la base de datos.';
+      } else if (relevantChunks && relevantChunks.length > 0) {
+        context = relevantChunks.map((chunk: any) => chunk.content).join('\n\n');
       }
-    );
-
-    if (searchError) {
-      console.error('Error searching chunks:', searchError);
+    } catch (embeddingError) {
+      console.error('Error generating embedding for search:', embeddingError);
+      context = 'Error al procesar la consulta de búsqueda.';
     }
-
-    // Construir contexto con los chunks relevantes
-    const context = relevantChunks && relevantChunks.length > 0
-      ? relevantChunks.map((chunk: any) => chunk.content).join('\n\n')
-      : 'No se encontró información relevante en la base de datos.';
 
     // Crear el prompt del sistema
     const systemPrompt = `Eres Ferb, un asistente de IA especializado en análisis financiero. Tu nombre viene de Phineas y Ferb.
@@ -57,12 +64,11 @@ Pregunta del usuario: ${userMessage}`;
       system: systemPrompt,
       prompt: userMessage,
       temperature: 0.7,
-      maxTokens: 1000,
     });
 
     return Response.json({
       content: result.text,
-      contextUsed: relevantChunks?.length || 0
+      contextUsed: 0 // Temporarily set to 0 until we fix the scope
     });
 
   } catch (error) {
