@@ -9,6 +9,13 @@ export const supabaseAdmin = createClient(
   {
     auth: {
       persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'supabase-admin',
+      },
     },
   }
 );
