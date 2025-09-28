@@ -16,42 +16,11 @@ export async function POST(request: Request) {
       return Response.json({ error: 'User message required' }, { status: 400 });
     }
 
-    // Buscar contexto relevante en la base de datos vectorial
-    let context = 'No se encontró información relevante en la base de datos.';
-
-    try {
-      const queryEmbedding = await generateEmbedding(userMessage);
-
-      const { data: relevantChunks, error: searchError } = await supabaseAdmin.rpc(
-        'match_document_chunks',
-        {
-          query_embedding: queryEmbedding,
-          match_threshold: 0.1,
-          match_count: 5
-        }
-      );
-
-      if (searchError) {
-        console.error('Error searching chunks:', searchError);
-        context = 'Error al buscar información en la base de datos.';
-      } else if (relevantChunks && relevantChunks.length > 0) {
-        context = relevantChunks.map((chunk: any) => chunk.content).join('\n\n');
-      }
-    } catch (embeddingError) {
-      console.error('Error generating embedding for search:', embeddingError);
-      context = 'Error al procesar la consulta de búsqueda.';
-    }
-
-    // Crear el prompt del sistema
+    // Por ahora, respuesta simple sin RAG para probar funcionalidad básica
     const systemPrompt = `Eres Ferb, un asistente de IA especializado en análisis financiero. Tu nombre viene de Phineas y Ferb.
-
-Contexto de datos disponibles:
-${context}
 
 Instrucciones:
 - Responde de manera amigable y profesional
-- Si tienes información relevante de los datos, úsala para responder
-- Si no tienes información específica, dilo claramente
 - Mantén las respuestas concisas pero informativas
 - Siempre responde en español
 - Tu personalidad es inteligente, útil y un poco juguetona como Ferb
@@ -68,13 +37,13 @@ Pregunta del usuario: ${userMessage}`;
 
     return Response.json({
       content: result.text,
-      contextUsed: 0 // Temporarily set to 0 until we fix the scope
+      contextUsed: 0
     });
 
   } catch (error) {
     console.error('Error in chat API:', error);
     return Response.json(
-      { error: 'Error interno del servidor' },
+      { error: `Error interno del servidor: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
   }
