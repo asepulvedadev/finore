@@ -28,7 +28,7 @@ Pregunta del usuario: ${userMessage}`;
 
     // Generar respuesta con Gemini usando el SDK directo
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
 
     const result = await model.generateContent(systemPrompt + '\n\n' + userMessage);
     const response = await result.response;
