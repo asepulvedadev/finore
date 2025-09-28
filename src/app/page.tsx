@@ -2,8 +2,8 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
+    <div className="min-h-screen bg-finore-secondary">
+      <header className="bg-finore-primary shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <Image
@@ -13,7 +13,7 @@ export default function Home() {
               height={50}
               priority
             />
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard Finore</h1>
+            <h1 className="text-2xl font-bold text-white">Dashboard Finore</h1>
           </div>
         </div>
       </header>

@@ -41,6 +41,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-finore-primary: var(--finore-primary);
+  --color-finore-secondary: var(--finore-secondary);
+  --color-finore-primary-dark: var(--finore-primary-dark);
+  --color-finore-secondary-dark: var(--finore-secondary-dark);
 }
 
 :root {
@@ -76,6 +80,10 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+  --finore-primary: #0760BA;
+  --finore-secondary: #4B5056;
+  --finore-primary-dark: #07568C;
+  --finore-secondary-dark: #2D3033;
 }
 
 .dark {
@@ -110,6 +118,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+  --finore-primary: #0760BA;
+  --finore-secondary: #4B5056;
+  --finore-primary-dark: #07568C;
+  --finore-secondary-dark: #2D3033;
 }
 
 @layer base {
