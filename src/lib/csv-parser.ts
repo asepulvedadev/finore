@@ -4,9 +4,7 @@ export interface CSVRow {
 
 export async function fetchCSVData(url: string): Promise<CSVRow[]> {
   try {
-    const response = await fetch(url, {
-      next: { revalidate: 300 }, // Cache for 5 minutes
-    });
+    const response = await fetch(url);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch CSV: ${response.statusText}`);
