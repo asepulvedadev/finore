@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ModeToggle } from "@/components/mode-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { AuthGuard } from "@/components/auth-guard";
+import { ChatModal } from "@/components/chat-modal";
 import { fetchCSVData, CSVRow } from "@/lib/csv-parser";
 
 export default function Home() {
@@ -110,6 +111,7 @@ export default function Home() {
             )}
           </div>
         </main>
+        <ChatModal />
       </div>
     </AuthGuard>
   );
