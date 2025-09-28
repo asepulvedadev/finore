@@ -6,6 +6,7 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { AuthGuard } from "@/components/auth-guard";
 import { ChatModal } from "@/components/chat-modal";
+import { TrafficLightDashboard } from "@/components/traffic-light-dashboard";
 import { Button } from "@/components/ui/button";
 import { fetchCSVData, CSVRow } from "@/lib/csv-parser";
 
@@ -87,60 +88,25 @@ export default function Home() {
           </div>
         </header>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-          <div className="bg-card p-4 sm:p-6 rounded-lg shadow border">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg sm:text-xl font-semibold text-card-foreground">Datos de Excel</h2>
-              <Button
-                onClick={handleIndexData}
-                disabled={isIndexing || isLoadingData}
-                size="sm"
-              >
-                {isIndexing ? 'Indexando...' : 'Indexar para IA'}
-              </Button>
+          {isLoadingData ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Cargando dashboard...</p>
+              </div>
             </div>
-            {indexMessage && (
-              <div className="mb-4 p-2 bg-muted rounded text-sm">
-                {indexMessage}
+          ) : csvData.length > 0 ? (
+            <TrafficLightDashboard csvData={csvData} />
+          ) : (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <p className="text-muted-foreground mb-4">No se pudieron cargar los datos</p>
+                <Button onClick={() => window.location.reload()}>
+                  Reintentar
+                </Button>
               </div>
-            )}
-            {isLoadingData ? (
-              <p className="text-sm sm:text-base text-muted-foreground">Cargando datos...</p>
-            ) : csvData.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full table-auto">
-                  <thead>
-                    <tr className="border-b">
-                      {Object.keys(csvData[0]).map((header) => (
-                        <th key={header} className="text-left p-2 text-sm font-medium text-card-foreground">
-                          {header}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {csvData.slice(0, 20).map((row, index) => (
-                      <tr key={index} className="border-b">
-                        {Object.values(row).map((value, cellIndex) => (
-                          <td key={cellIndex} className="p-2 text-sm text-muted-foreground">
-                            {value || '-'}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {csvData.length > 20 && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Mostrando las primeras 20 filas de {csvData.length} registros.
-                  </p>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm sm:text-base text-muted-foreground">
-                No se pudieron cargar los datos. Verifica la URL del CSV.
-              </p>
-            )}
-          </div>
+            </div>
+          )}
         </main>
         <ChatModal />
       </div>
