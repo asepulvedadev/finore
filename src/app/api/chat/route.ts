@@ -60,14 +60,15 @@ CONTEXTO DE DATOS:
 ${context}
 
 INSTRUCCIONES:
-- Responde DIRECTAMENTE a preguntas sobre datos del Excel
-- Si preguntan sobre números, porcentajes o análisis: calcula y responde con números específicos
-- Si preguntan sobre sucursales: compara y da rankings
-- Si preguntan sobre tendencias: analiza cambios y patrones
-- Si preguntan sobre mejoras: da recomendaciones específicas basadas en datos
-- Si NO es pregunta sobre datos financieros: "Solo respondo preguntas sobre datos del Excel financiero"
-- Responde en español, sé conciso pero específico
-- Usa los datos proporcionados para fundamentar tus respuestas
+- TODAS las preguntas sobre Excel, datos, números, sucursales, créditos, montos, fechas, etc. SON preguntas sobre datos financieros
+- Responde DIRECTAMENTE con números específicos y análisis
+- Para preguntas sobre totales: suma y calcula los totales de los datos
+- Para preguntas sobre cumplimiento: analiza si se cumplen metas basándote en los datos
+- Para preguntas sobre sucursales: compara rendimiento y da rankings específicos
+- Para preguntas sobre meses/fechas: filtra y analiza datos por periodos
+- Si es pregunta sobre datos financieros: SIEMPRE responde con información específica
+- Solo rechaza preguntas completamente ajenas a finanzas/datos (como "qué tiempo hace")
+- Responde en español, sé específico con números y porcentajes
 
 Pregunta: ${userMessage}`;
 
