@@ -17,54 +17,59 @@ export async function POST(request: Request) {
       return Response.json({ error: 'User message required' }, { status: 400 });
     }
 
-    // Buscar contexto relevante en la base de datos vectorial
+    // Buscar contexto relevante en la base de datos
     let context = '';
-    let relevantChunks: any[] = [];
+    let dataSummary = '';
+    let chunks: any[] = [];
 
     try {
-      const queryEmbedding = await generateEmbedding(userMessage);
+      // Buscar chunks directamente en la tabla (sin función RPC por ahora)
+      const { data: chunkData, error: searchError } = await supabaseAdmin
+        .from('document_chunks')
+        .select('content, metadata')
+        .limit(20);
 
-      const { data: chunks, error: searchError } = await supabaseAdmin.rpc(
-        'match_document_chunks',
-        {
-          query_embedding: queryEmbedding,
-          match_threshold: 0.1,
-          match_count: 10
-        }
-      );
+      chunks = chunkData || [];
 
       if (searchError) {
-        console.error('Error searching chunks:', searchError);
-        context = 'Error al buscar información en la base de datos.';
+        console.error('Error fetching chunks:', searchError);
+        context = 'Error al acceder a la base de datos de chunks.';
       } else if (chunks && chunks.length > 0) {
-        relevantChunks = chunks;
-        context = chunks.map((chunk: any) => chunk.content).join('\n\n');
+        // Tomar una muestra representativa de los datos
+        const sampleChunks = chunks.slice(0, 10);
+        context = sampleChunks.map((chunk: any) => chunk.content).join('\n\n');
+
+        // Crear resumen de datos disponibles
+        dataSummary = `Datos disponibles: ${chunks.length} registros de Excel con información de créditos, sucursales, montos y fechas.`;
       } else {
-        context = 'No se encontró información relevante en la base de datos para esta consulta.';
+        context = 'No hay datos indexados disponibles en la base de datos.';
+        dataSummary = 'No hay datos disponibles para análisis.';
       }
-    } catch (embeddingError) {
-      console.error('Error generating embedding for search:', embeddingError);
-      context = 'Error al procesar la consulta de búsqueda.';
+    } catch (error) {
+      console.error('Error accessing database:', error);
+      context = 'Error al acceder a la información.';
+      dataSummary = 'Error en la base de datos.';
     }
 
-    // Crear el prompt del sistema para análisis financiero
-    const systemPrompt = `Eres Ferb, un asistente de IA especializado ÚNICAMENTE en análisis de datos financieros del Excel de Finore. Tu nombre viene de Phineas y Ferb.
+    // Crear el prompt del sistema más directo y enfocado
+    const systemPrompt = `Eres Ferb, asistente de análisis financiero de Finore.
 
-INFORMACIÓN DISPONIBLE:
+DATOS DISPONIBLES: ${dataSummary}
+
+CONTEXTO DE DATOS:
 ${context}
 
-INSTRUCCIONES ESTRICTAS:
-- SOLO responde preguntas relacionadas con los datos del Excel financiero
-- SI la pregunta NO está relacionada con datos financieros o Excel, di: "Lo siento, solo puedo ayudarte con análisis de datos financieros del Excel."
-- Realiza cálculos, porcentajes y análisis estadístico cuando sea solicitado
-- Da ideas para mejorar métricas financieras basadas en los datos
-- Compara sucursales, tendencias y desempeño
-- Siempre responde en español
-- Sé específico con números y porcentajes cuando los tengas
-- Si no hay suficiente información, dilo claramente
-- Tu personalidad es inteligente, útil y un poco juguetona como Ferb
+INSTRUCCIONES:
+- Responde DIRECTAMENTE a preguntas sobre datos del Excel
+- Si preguntan sobre números, porcentajes o análisis: calcula y responde con números específicos
+- Si preguntan sobre sucursales: compara y da rankings
+- Si preguntan sobre tendencias: analiza cambios y patrones
+- Si preguntan sobre mejoras: da recomendaciones específicas basadas en datos
+- Si NO es pregunta sobre datos financieros: "Solo respondo preguntas sobre datos del Excel financiero"
+- Responde en español, sé conciso pero específico
+- Usa los datos proporcionados para fundamentar tus respuestas
 
-Pregunta del usuario: ${userMessage}`;
+Pregunta: ${userMessage}`;
 
     // Generar respuesta con Gemini usando Vercel AI SDK
     const result = await generateText({
@@ -76,7 +81,7 @@ Pregunta del usuario: ${userMessage}`;
 
     return Response.json({
       content: result.text,
-      contextUsed: relevantChunks?.length || 0
+      contextUsed: chunks?.length || 0
     });
 
   } catch (error) {
