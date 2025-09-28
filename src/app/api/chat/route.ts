@@ -1,5 +1,4 @@
-import { google } from '@ai-sdk/google';
-import { generateText } from 'ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function POST(request: Request) {
@@ -27,16 +26,16 @@ Instrucciones:
 
 Pregunta del usuario: ${userMessage}`;
 
-    // Generar respuesta con Gemini
-    const result = await generateText({
-      model: google('gemini-1.5-flash'),
-      system: systemPrompt,
-      prompt: userMessage,
-      temperature: 0.7,
-    });
+    // Generar respuesta con Gemini usando el SDK directo
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const result = await model.generateContent(systemPrompt + '\n\n' + userMessage);
+    const response = await result.response;
+    const text = response.text();
 
     return Response.json({
-      content: result.text,
+      content: text,
       contextUsed: 0
     });
 
@@ -46,30 +45,5 @@ Pregunta del usuario: ${userMessage}`;
       { error: `Error interno del servidor: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }
     );
-  }
-}
-
-// Función auxiliar para generar embeddings (reutilizando la lógica existente)
-async function generateEmbedding(text: string): Promise<number[]> {
-  try {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY not configured');
-    }
-
-    const { GoogleGenerativeAI } = await import('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-    const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
-    const result = await model.embedContent(text);
-
-    if (!result.embedding?.values) {
-      throw new Error('No embedding returned');
-    }
-
-    return result.embedding.values;
-  } catch (error) {
-    console.error('Error generating embedding:', error);
-    // Retornar embedding vacío si falla
-    return new Array(768).fill(0);
   }
 }
