@@ -8,7 +8,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       throw new Error('GEMINI_API_KEY not configured');
     }
 
-    const model = genAI.getGenerativeModel({ model: 'text-embedding-004' });
+    const model = genAI.getGenerativeModel({ model: 'embedding-001' });
 
     const result = await model.embedContent(text);
 
