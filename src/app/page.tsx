@@ -9,16 +9,17 @@ export default function Home() {
       <div className="min-h-screen bg-background">
         <header className="bg-card shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center py-4 gap-4">
               <Image
                 src="/logo-finore-horizontal.svg"
                 alt="Finore Logo"
                 width={200}
                 height={50}
                 priority
+                className="w-32 sm:w-48"
               />
-              <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold text-foreground">Dashboard Finore</h1>
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground text-center sm:text-left">Dashboard Finore</h1>
                 <div className="flex items-center gap-2">
                   <ModeToggle />
                   <UserMenu />
@@ -27,24 +28,24 @@ export default function Home() {
             </div>
           </div>
         </header>
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-card p-6 rounded-lg shadow border">
-              <h2 className="text-lg font-semibold text-card-foreground">Ingresos</h2>
-              <p className="text-3xl font-bold text-green-600">$1,234,567</p>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="bg-card p-4 sm:p-6 rounded-lg shadow border">
+              <h2 className="text-base sm:text-lg font-semibold text-card-foreground">Ingresos</h2>
+              <p className="text-2xl sm:text-3xl font-bold text-green-600">$1,234,567</p>
             </div>
-            <div className="bg-card p-6 rounded-lg shadow border">
-              <h2 className="text-lg font-semibold text-card-foreground">Gastos</h2>
-              <p className="text-3xl font-bold text-red-600">$987,654</p>
+            <div className="bg-card p-4 sm:p-6 rounded-lg shadow border">
+              <h2 className="text-base sm:text-lg font-semibold text-card-foreground">Gastos</h2>
+              <p className="text-2xl sm:text-3xl font-bold text-red-600">$987,654</p>
             </div>
-            <div className="bg-card p-6 rounded-lg shadow border">
-              <h2 className="text-lg font-semibold text-card-foreground">Beneficio</h2>
-              <p className="text-3xl font-bold text-blue-600">$246,913</p>
+            <div className="bg-card p-4 sm:p-6 rounded-lg shadow border sm:col-span-2 lg:col-span-1">
+              <h2 className="text-base sm:text-lg font-semibold text-card-foreground">Beneficio</h2>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-600">$246,913</p>
             </div>
           </div>
-          <div className="mt-8 bg-card p-6 rounded-lg shadow border">
-            <h2 className="text-xl font-semibold text-card-foreground mb-4">Información Financiera</h2>
-            <p className="text-muted-foreground">Aquí se mostrará la información financiera detallada de la empresa Finore.</p>
+          <div className="mt-6 sm:mt-8 bg-card p-4 sm:p-6 rounded-lg shadow border">
+            <h2 className="text-lg sm:text-xl font-semibold text-card-foreground mb-4">Información Financiera</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">Aquí se mostrará la información financiera detallada de la empresa Finore.</p>
           </div>
         </main>
       </div>
