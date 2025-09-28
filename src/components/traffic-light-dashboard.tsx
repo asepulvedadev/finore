@@ -118,7 +118,7 @@ export function TrafficLightDashboard({ csvData }: TrafficLightDashboardProps) {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span>Requiere atención (<75% cumplimiento)</span>
+            <span>Requiere atención (menos del 75% cumplimiento)</span>
           </div>
         </div>
       </div>
