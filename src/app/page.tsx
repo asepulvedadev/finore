@@ -57,26 +57,7 @@ export default function Home() {
           </div>
         </header>
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div className="bg-card p-4 sm:p-6 rounded-lg shadow border">
-              <h2 className="text-base sm:text-lg font-semibold text-card-foreground">Ingresos</h2>
-              <p className="text-2xl sm:text-3xl font-bold text-green-600">$1,234,567</p>
-            </div>
-            <div className="bg-card p-4 sm:p-6 rounded-lg shadow border">
-              <h2 className="text-base sm:text-lg font-semibold text-card-foreground">Gastos</h2>
-              <p className="text-2xl sm:text-3xl font-bold text-red-600">$987,654</p>
-            </div>
-            <div className="bg-card p-4 sm:p-6 rounded-lg shadow border sm:col-span-2 lg:col-span-1">
-              <h2 className="text-base sm:text-lg font-semibold text-card-foreground">Beneficio</h2>
-              <p className="text-2xl sm:text-3xl font-bold text-blue-600">$246,913</p>
-            </div>
-          </div>
-          <div className="mt-6 sm:mt-8 bg-card p-4 sm:p-6 rounded-lg shadow border">
-            <h2 className="text-lg sm:text-xl font-semibold text-card-foreground mb-4">Información Financiera</h2>
-            <p className="text-sm sm:text-base text-muted-foreground">Aquí se mostrará la información financiera detallada de la empresa Finore.</p>
-          </div>
-
-          <div className="mt-6 sm:mt-8 bg-card p-4 sm:p-6 rounded-lg shadow border">
+          <div className="bg-card p-4 sm:p-6 rounded-lg shadow border">
             <h2 className="text-lg sm:text-xl font-semibold text-card-foreground mb-4">Datos de Excel</h2>
             {isLoadingData ? (
               <p className="text-sm sm:text-base text-muted-foreground">Cargando datos...</p>
@@ -93,22 +74,17 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {csvData.slice(0, 10).map((row, index) => (
+                    {csvData.map((row, index) => (
                       <tr key={index} className="border-b">
                         {Object.values(row).map((value, cellIndex) => (
                           <td key={cellIndex} className="p-2 text-sm text-muted-foreground">
-                            {value}
+                            {value || '-'}
                           </td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                {csvData.length > 10 && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Mostrando las primeras 10 filas de {csvData.length} registros.
-                  </p>
-                )}
               </div>
             ) : (
               <p className="text-sm sm:text-base text-muted-foreground">
