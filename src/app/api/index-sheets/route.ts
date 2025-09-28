@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { indexSheetData } from '@/lib/index-sheets';
+import { checkAndIndexData } from '@/lib/index-sheets';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Iniciando indexación desde API...');
+    console.log('Iniciando verificación e indexación desde API...');
 
-    const result = await indexSheetData();
+    const result = await checkAndIndexData();
 
     if (result.success) {
       return NextResponse.json({
-        message: 'Indexación completada exitosamente',
+        message: result.message || 'Indexación completada exitosamente',
         chunksInserted: result.count
       });
     } else {

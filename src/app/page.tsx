@@ -14,6 +14,7 @@ export default function Home() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Primero cargar los datos del CSV
         const response = await fetch('/api/csv');
         const result = await response.json();
 
@@ -22,6 +23,22 @@ export default function Home() {
           setCsvData([]);
         } else {
           setCsvData(result.data);
+
+          // Después de cargar los datos, verificar y indexar si es necesario
+          try {
+            const indexResponse = await fetch('/api/index-sheets', {
+              method: 'POST',
+            });
+            const indexResult = await indexResponse.json();
+
+            if (indexResult.error) {
+              console.error('Error en indexación:', indexResult.error);
+            } else {
+              console.log('Indexación:', indexResult.message);
+            }
+          } catch (indexError) {
+            console.error('Error al verificar indexación:', indexError);
+          }
         }
       } catch (error) {
         console.error('Error fetching CSV data:', error);
