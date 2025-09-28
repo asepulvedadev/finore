@@ -13,10 +13,20 @@ export default function Home() {
 
   useEffect(() => {
     const loadData = async () => {
-      // Replace with your actual CSV URL
-      const CSV_URL = process.env.NEXT_PUBLIC_CSV_URL || 'https://docs.google.com/spreadsheets/d/e/YOUR_SHEET_ID/pub?output=csv';
-      const data = await fetchCSVData(CSV_URL);
-      setCsvData(data);
+      try {
+        const response = await fetch('/api/csv');
+        const result = await response.json();
+
+        if (result.error) {
+          console.error('Error fetching CSV:', result.error);
+          setCsvData([]);
+        } else {
+          setCsvData(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching CSV data:', error);
+        setCsvData([]);
+      }
       setIsLoadingData(false);
     };
 
